@@ -30,7 +30,6 @@ module.exports.likeCard = (req, res) => {
     },
     {
       new: true,
-      runValidators: true,
     },
   )
     .then((card) => res.send({ data: card }))
@@ -46,7 +45,6 @@ module.exports.dislikeCard = (req, res) => {
     },
     {
       new: true,
-      runValidators: true,
     },
   )
     .then((card) => res.send({ data: card }))

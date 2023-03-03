@@ -11,7 +11,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
-  useUnifiedTopology: true,
 });
 
 app.use(bodyParser.json());
@@ -32,6 +31,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  /* eslint no-console: ["error", { allow: ["log"] }] */
   console.log(`App listening on port ${PORT}`);
 });
