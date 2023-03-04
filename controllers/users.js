@@ -41,7 +41,7 @@ module.exports.updateUserProfile = (req, res) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Что-то не так' }));
+    .catch(() => res.status(400).send({ message: 'Что-то не так' }));
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -58,5 +58,5 @@ module.exports.updateUserAvatar = (req, res) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Что-то не так' }));
+    .catch(() => res.status(400).send({ message: 'Что-то не так' }));
 };
