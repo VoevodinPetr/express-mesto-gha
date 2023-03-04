@@ -3,7 +3,7 @@ const cardsRouter = require('express').Router();
 const {
   getAllCards,
   createNewCard,
-  deleteCardById,
+  deleteCard,
   likeCard,
   dislikeCard,
 } = require('../controllers/cards');
@@ -12,7 +12,7 @@ cardsRouter.get('/', getAllCards);
 
 cardsRouter.post('/', createNewCard);
 
-cardsRouter.delete('/:id', deleteCardById);
+cardsRouter.delete('/:id', deleteCard);
 
 cardsRouter.put('/:id/likes', likeCard);
 

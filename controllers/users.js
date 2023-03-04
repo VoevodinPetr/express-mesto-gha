@@ -8,6 +8,7 @@ module.exports.getAllUsers = (req, res) => {
 
 module.exports.getUserById = (req, res) => {
   User.findById(req.params.id)
+    .orFail()
     .then((user) => {
       if (user !== null) {
         res.send({ data: user });
@@ -15,15 +16,27 @@ module.exports.getUserById = (req, res) => {
         res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
       }
     })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Нет пользователя с таким ID' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
-module.exports.createNewUser = (req, res) => {
+module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  return User.create({ name, about, avatar })
+    .then((user) => res.status(200).send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.updateUserProfile = (req, res) => {
@@ -38,10 +51,17 @@ module.exports.updateUserProfile = (req, res) => {
     },
     {
       new: true,
+      runValidators: true,
     },
-  )
+  ).orFail()
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'Что-то не так' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Введите имя и информацию о себе' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -55,8 +75,15 @@ module.exports.updateUserAvatar = (req, res) => {
     },
     {
       new: true,
+      runValidators: true,
     },
-  )
+  ).orFail()
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(400).send({ message: 'Что-то не так' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Введите ссылку на аватар' });
+      } else {
+        res.status(500).send({ message: 'Произошла ошибка' });
+      }
+    });
 };
