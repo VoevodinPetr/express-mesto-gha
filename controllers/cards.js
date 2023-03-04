@@ -13,7 +13,7 @@ module.exports.createNewCard = (req, res) => {
   return Card.create({ name, link, owner: userId })
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
@@ -47,7 +47,7 @@ module.exports.likeCard = (req, res) => {
   ).orFail()
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
@@ -68,7 +68,7 @@ module.exports.dislikeCard = (req, res) => {
   ).orFail()
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка' });
       } else {
         res.status(500).send({ message: 'Произошла ошибка' });
