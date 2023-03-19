@@ -6,21 +6,23 @@ const ForbiddenError = require('../errors/ForbiddenError');
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports.createNewCard = (req, res, next) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
+  const ownerId = req.user._id;
 
-  return Card.create({ name, link, owner })
+  return Card.create({ name, link, owner: ownerId })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Переданы некорректные данные при создании карточки');
+        next(new BadRequest('Переданы некорректные данные при создании карточки'));
       }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -31,12 +33,13 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
-        Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
-      } else {
-        throw new ForbiddenError('В доступе отказано');
+        return Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
       }
+      throw new ForbiddenError('Нельзя удалить чужую карточку');
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {

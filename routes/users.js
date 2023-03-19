@@ -8,11 +8,20 @@ const {
   getCurrentUser,
 } = require('../controllers/users');
 
+const { createUser, login } = require('../controllers/users');
+const {
+  validationCreateUser,
+  validationLogin,
+} = require('../middlewares/validations');
+
 const {
   validationUserId,
   validationUpdateUserProfile,
   validationUpdateUserAvatar,
 } = require('../middlewares/validations');
+
+router.post('/signin', validationLogin, login);
+router.post('/signup', validationCreateUser, createUser);
 
 router.get('/', getUsers);
 
