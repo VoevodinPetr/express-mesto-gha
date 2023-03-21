@@ -34,11 +34,17 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
-        return Card.findByIdAndRemove(cardId).then(() => res.status(200).send(card));
+        Card.findByIdAndRemove(cardId)
+          .then(() => res.status(200).send(card));
+      } else {
+        throw new ForbiddenError('В доступе отказано');
       }
-      throw new ForbiddenError('Нельзя удалить чужую карточку');
     })
     .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequest('Некоректный id'));
+        return;
+      }
       next(err);
     });
 };
