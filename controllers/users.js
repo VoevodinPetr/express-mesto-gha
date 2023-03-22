@@ -16,9 +16,7 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
   return User.findById(userId)
-    .orFail(() => {
-      throw new NotFound('Пользователь по указанному _id не найден');
-    })
+    .orFail(new NotFound(`Пользователь  с указанным _id ${userId} не найден`))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -34,7 +32,7 @@ module.exports.createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  bcrypt.hash(password, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
         name, about, avatar, email, password: hash,
@@ -61,9 +59,7 @@ module.exports.updateUserProfile = (req, res, next) => {
     userId,
     { name, about },
     { new: true, runValidators: true },
-  ).orFail(() => {
-    throw new NotFound('Пользователь с указанным _id не найден');
-  })
+  ).orFail(new NotFound(`Пользователь с указанным _id ${userId} не найден`))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -82,9 +78,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     userId,
     { avatar },
     { new: true, runValidators: true },
-  ).orFail(() => {
-    throw new NotFound('Пользователь с указанным _id не найден');
-  })
+  ).orFail(new NotFound(`Пользователь с указанным _id ${userId} не найден`))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -97,9 +91,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail(() => {
-      throw new NotFound('Пользователь не найден');
-    })
+    .orFail(new NotFound('Пользователь не найден'))
     .then((user) => res.status(200).send({ user }))
     .catch((err) => {
       next(err);

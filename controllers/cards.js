@@ -29,17 +29,20 @@ module.exports.createNewCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   return Card.findById(cardId)
-    .orFail(() => {
-      throw new NotFound('Карточка с указанным _id не найдена');
-    })
+    .orFail(new NotFound(`Карточка с указанным _id ${cardId} не найдена`))
     .then((card) => {
-      if (card.owner.toString() === req.user._id) {
-        Card.findByIdAndRemove(cardId)
-          .then(() => res.status(200).send(card));
-      } else {
-        throw new ForbiddenError('В доступе отказано');
+      if (card) {
+        const owner = card.owner.toString();
+        if (owner === req.user._id) {
+          return card.remove();
+        }
+        return Promise.reject(
+          new ForbiddenError('Запрещено удалять чужие карточки'),
+        );
       }
+      return Promise.reject(new NotFound('Карточка не найдена'));
     })
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Некоректный id'));
@@ -50,17 +53,16 @@ module.exports.deleteCard = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     {
       $addToSet: { likes: req.user._id },
     },
     {
       new: true,
     },
-  ).orFail(() => {
-    throw new NotFound('Передан несуществующий _id карточки');
-  })
+  ).orFail(new NotFound(`Карточка с указанным _id ${cardId} не найдена`))
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -72,17 +74,16 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     {
       $pull: { likes: req.user._id },
     },
     {
       new: true,
     },
-  ).orFail(() => {
-    throw new NotFound('Передан несуществующий _id карточки');
-  })
+  ).orFail(new NotFound(`Карточка с указанным _id ${cardId} не найдена`))
     .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
