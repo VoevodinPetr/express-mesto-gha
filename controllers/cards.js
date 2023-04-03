@@ -42,7 +42,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return Promise.reject(new NotFound('Карточка не найдена'));
     })
-    .then((card) => res.status(200).send(card))
+    .then(() => res.status(200).send({ message: 'Карточка удалена безвозвратно!' }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequest('Некоректный id'));
